@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator</title>
+  <style>
+    .calculator {
+      width: 300px;
+      margin: 50px auto;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .display {
+      background-color: #f0f0f0;
+      padding: 20px;
+      text-align: right;
+      font-size: 24px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    button {
+      padding: 20px;
+      font-size: 20px;
+      border: none;
+      background-color: #eee;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #ddd;
+    }
+
+    .operator {
+      background-color: #fca311;
+      color: white;
+    }
+
+    .operator:hover {
+      background-color: #e8980e;
+    }
+
+    .clear {
+      background-color: #dc2f2f;
+      color: white;
+    }
+
+    .clear:hover {
+      background-color: #c32a2a;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display" id="display">0</div>
+    <div class="buttons">
+      <button class="clear">C</button>
+      <button>%</button>
+      <button>/</button>
+      <button>*</button>
+      <button>7</button>
+      <button>8</button>
+      <button>9</button>
+      <button>-</button>
+      <button>4</button>
+      <button>5</button>
+      <button>6</button>
+      <button>+</button>
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button>=</button>
+      <button>0</button>
+      <button>.</button>
+      <button>+/-</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById('display');
+    const buttons = document.querySelectorAll('.buttons button');
+
+    let currentNumber = '';
+    let firstOperand = null;
+    let operator = null;
+    let shouldResetDisplay = false;
+
+    function updateDisplay() {
+      display.textContent = currentNumber;
+    }
+
+    function clearDisplay() {
+      currentNumber = '0';
+      firstOperand = null;
+      operator = null;
+      shouldResetDisplay = false;
+      updateDisplay();
+    }
+
+    function inputDigit(digit) {
+      if (shouldResetDisplay) {
+        currentNumber = digit;
+        shouldResetDisplay = false;
+      } else if (currentNumber === '0') {
+        currentNumber = digit;
+      } else {
+        currentNumber += digit;
+      }
+      updateDisplay();
+    }
+
+    function inputDecimal() {
+      if (!currentNumber.includes('.')) {
+        currentNumber += '.';
+        updateDisplay();
+      }
+    }
+
+    function handleOperator(op) {
+      if (operator && firstOperand !== null && currentNumber !== '') {
+        calculate();
+      }
+      firstOperand = currentNumber;
+      operator = op;
+      shouldResetDisplay = true;
+    }
+
+    function calculate() {
+      if (operator === null || firstOperand === null || currentNumber === '') return;
+
+      const result = operate(operator, firstOperand, currentNumber);
+
+      if (result === "Nope!") {
+        currentNumber = result;
+      } else {
+        currentNumber = roundResult(result);
+      }
+
+      firstOperand = null;
+      operator = null;
+      shouldResetDisplay = true;
+      updateDisplay();
+    }
+
+    function roundResult(number) {
+      return Math.round(number * 1000) / 1000;
+    }
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const buttonValue = button.textContent;
+        if (/\d/.test(buttonValue)) {
+          inputDigit(buttonValue);
+        } else if (buttonValue === '.') {
+          inputDecimal();
+        } else if (['+', '-', '*', '/'].includes(buttonValue)) {
+          handleOperator(buttonValue);
+        } else if (buttonValue === '=') {
+          calculate();
+        } else if (buttonValue === 'C') {
+          clearDisplay();
+        }
+      });
+    });
+
+    // Initial display update
+    updateDisplay();
+  </script>
+</body>
+</html>
